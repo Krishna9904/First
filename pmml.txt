@@ -224,3 +224,38 @@ The buy_stock() function buys a given quantity of a given stock for a given acco
 The sell_stock() function sells a given quantity of a given stock for a given account, adding the revenue to the account's balance and subtracting the sold quantity from the account's list of owned stocks.
 
 We use the json.dump() function to save changes to the "accounts.json" file after each transaction.
+
+
+
+
+# Initializing the database dictionary
+database = {'AAPL': 100, 'GOOG': 200, 'MSFT': 150}
+
+# Function to buy stocks
+def buy_stock(stock, quantity):
+    if stock in database:
+        database[stock] += quantity
+    else:
+        database[stock] = quantity
+    print(f"Bought {quantity} shares of {stock} stock.")
+
+# Function to sell stocks
+def sell_stock(stock, quantity):
+    if stock in database and database[stock] >= quantity:
+        database[stock] -= quantity
+        print(f"Sold {quantity} shares of {stock} stock.")
+    else:
+        print(f"You do not have enough {stock} stock to sell.")
+
+# Function to display stock portfolio
+def display_portfolio():
+    print("Stock Portfolio:")
+    for stock, quantity in database.items():
+        print(f"{stock}: {quantity}")
+
+# Example usage of the functions
+buy_stock('AAPL', 50)
+buy_stock('FB', 75)
+sell_stock('AAPL', 25)
+display_portfolio()
+
