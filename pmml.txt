@@ -36,3 +36,191 @@ clf.score(df_test[feature_names], df_test["y"])
 
 ## Save model to PMML
 sklearn2pmml(clf, "boosting_model.pmml", with_repr=True)
+
+
+
+
+import json
+
+# Open the JSON file
+with open('data.json', 'r') as file:
+    data = json.load(file)
+
+# Create a new entry
+new_entry = {'name': 'John Doe', 'age': 30}
+data.append(new_entry)
+
+# Update an existing entry
+for entry in data:
+    if entry['name'] == 'Jane Doe':
+        entry['age'] = 35
+
+# Delete an entry
+data = [entry for entry in data if entry['name'] != 'James Smith']
+
+# Write the updated data to the JSON file
+with open('data.json', 'w') as file:
+    json.dump(data, file)
+This code assumes that you have a file named data.json in the same directory as the Python script, and that the file contains a JSON array of objects. You can modify the code to suit your specific JSON structure and CRUD requirements.
+
+
+
+
+
+Amperayani Krishna
+atm machine code for demo using python and json as db
+Here's an example code for an ATM machine demo using Python and JSON as the database:
+
+python
+Copy code
+import json
+
+# Load the account data from JSON file
+with open('accounts.json', 'r') as f:
+    accounts = json.load(f)
+
+# Function for displaying account balance
+def display_balance(account):
+    print("Current balance: ${}".format(account['balance']))
+
+# Function for withdrawing money from account
+def withdraw(account, amount):
+    if account['balance'] < amount:
+        print("Insufficient funds")
+    else:
+        account['balance'] -= amount
+        print("Withdrawal successful")
+        display_balance(account)
+
+# Function for depositing money into account
+def deposit(account, amount):
+    account['balance'] += amount
+    print("Deposit successful")
+    display_balance(account)
+
+# Function for updating account data to JSON file
+def update_accounts():
+    with open('accounts.json', 'w') as f:
+        json.dump(accounts, f)
+
+# Main program loop
+while True:
+    # Ask for account number and validate it
+    account_number = input("Enter account number: ")
+    if account_number not in accounts:
+        print("Invalid account number")
+        continue
+
+    # Ask for PIN and validate it
+    pin = input("Enter PIN: ")
+    if accounts[account_number]['pin'] != pin:
+        print("Invalid PIN")
+        continue
+
+    # Display account balance and offer options
+    display_balance(accounts[account_number])
+    print("1. Withdraw\n2. Deposit\n3. Quit")
+    choice = input("Enter choice: ")
+
+    # Perform selected action
+    if choice == '1':
+        amount = int(input("Enter amount to withdraw: "))
+        withdraw(accounts[account_number], amount)
+        update_accounts()
+    elif choice == '2':
+        amount = int(input("Enter amount to deposit: "))
+        deposit(accounts[account_number], amount)
+        update_accounts()
+    elif choice == '3':
+        break
+    else:
+        print("Invalid choice")
+This code assumes that you have a file named accounts.json in the same directory as the Python script, and that the file contains a JSON object where the keys are account numbers and the values are objects with pin and balance keys. You can modify the code to suit your specific JSON structure and ATM requirements. Note that this code is just a demonstration and not suitable for real-world use, as it does not include proper security measures or error handling.
+
+
+
+
+
+
+import json
+
+# Load initial data from JSON file
+with open("accounts.json", "r") as f:
+    accounts = json.load(f)
+
+# Define helper function to save data to JSON file
+def save_data():
+    with open("accounts.json", "w") as f:
+        json.dump(accounts, f)
+
+# Define function to get account by username
+def get_account(username):
+    for account in accounts:
+        if account["username"] == username:
+            return account
+    return None
+
+# Define function to create a new account
+def create_account(username, balance):
+    account = {
+        "username": username,
+        "balance": balance,
+        "stocks": {}
+    }
+    accounts.append(account)
+    save_data()
+
+# Define function to buy a stock
+def buy_stock(username, stock_name, quantity, price):
+    account = get_account(username)
+    if account is None:
+        return "Account not found"
+    cost = quantity * price
+    if account["balance"] < cost:
+        return "Insufficient balance"
+    if stock_name not in account["stocks"]:
+        account["stocks"][stock_name] = 0
+    account["stocks"][stock_name] += quantity
+    account["balance"] -= cost
+    save_data()
+    return "Stock purchased successfully"
+
+# Define function to sell a stock
+def sell_stock(username, stock_name, quantity, price):
+    account = get_account(username)
+    if account is None:
+        return "Account not found"
+    if stock_name not in account["stocks"]:
+        return "Stock not owned"
+    if account["stocks"][stock_name] < quantity:
+        return "Insufficient quantity"
+    revenue = quantity * price
+    account["stocks"][stock_name] -= quantity
+    account["balance"] += revenue
+    save_data()
+    return "Stock sold successfully"
+
+# Example usage
+create_account("Alice", 10000)
+create_account("Bob", 5000)
+print(get_account("Alice"))
+print(get_account("Bob"))
+buy_stock("Alice", "AAPL", 10, 135)
+buy_stock("Bob", "GOOG", 5, 2450)
+print(get_account("Alice"))
+print(get_account("Bob"))
+sell_stock("Alice", "AAPL", 5, 140)
+sell_stock("Bob", "GOOG", 3, 2500)
+print(get_account("Alice"))
+print(get_account("Bob"))
+In this example, we define a list of accounts in a JSON file called "accounts.json". We load this data into memory using the json.load() function, and then define several functions to interact with the data.
+
+The get_account() function searches the list of accounts for an account with a given username, and returns that account if it exists.
+
+The create_account() function creates a new account with a given username and balance, and adds it to the list of accounts.
+
+The buy_stock() function buys a given quantity of a given stock for a given account, subtracting the cost from the account's balance and adding the stock to the account's list of owned stocks.
+
+The sell_stock() function sells a given quantity of a given stock for a given account, adding the revenue to the account's balance and subtracting the sold quantity from the account's list of owned stocks.
+
+We use the json.dump() function to save changes to the "accounts.json" file after each transaction.
