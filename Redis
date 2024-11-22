@@ -1,0 +1,125 @@
+import React from 'react';
+import Feedback from './Feedback';
+
+const App = () => {
+  return (
+    <div>
+      <h1>Question Feedback</h1>
+      <Feedback questionId="q1" />
+      {/* Add more instances of Feedback for other questions */}
+    </div>
+  );
+};
+
+export default App;
+const express = require('express');
+const redis = require('redis');
+const bodyParser = require('body-parser');
+
+const app = express();
+const port = 5000;
+
+// Create a Redis client
+const client = redis.createClient({
+  host: 'localhost', // Redis server location
+  port: 6379, // Default Redis port
+});
+
+// Middleware
+app.use(bodyParser.json());
+
+// Route to submit feedback
+app.post('/feedback', (req, res) => {
+  const { questionId, feedback } = req.body;
+
+  // Store feedback in Redis (use questionId as key)
+  client.lpush(questionId, feedback, (err, reply) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error saving feedback' });
+    }
+    res.json({ message: 'Feedback submitted successfully!' });
+  });
+});
+
+// Route to get feedback for a specific question
+app.get('/feedback/:questionId', (req, res) => {
+  const { questionId } = req.params;
+
+  // Get all feedback for the question
+  client.lrange(questionId, 0, -1, (err, reply) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error fetching feedback' });
+    }
+    res.json({ feedback: reply });
+  });
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
+});
+
+
+import React, { useState } from 'react';
+
+const Feedback = ({ questionId }) => {
+  const [feedback, setFeedback] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [feedbackList, setFeedbackList] = useState([]);
+
+  const handleFeedbackChange = (event) => {
+    setFeedback(event.target.value);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    // Submit the feedback to the backend
+    const response = await fetch('http://localhost:5000/feedback', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ questionId, feedback }),
+    });
+
+    if (response.ok) {
+      setSubmitted(true);
+      setFeedback('');
+      fetchFeedback();
+    }
+  };
+
+  const fetchFeedback = async () => {
+    const response = await fetch(`http://localhost:5000/feedback/${questionId}`);
+    const data = await response.json();
+    setFeedbackList(data.feedback || []);
+  };
+
+  React.useEffect(() => {
+    fetchFeedback();
+  }, [questionId]);
+
+  return (
+    <div>
+      <h3>Feedback for Question {questionId}</h3>
+      <ul>
+        {feedbackList.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          value={feedback}
+          onChange={handleFeedbackChange}
+          placeholder="Leave your feedback here"
+        />
+        <button type="submit">Submit Feedback</button>
+      </form>
+      {submitted && <p>Feedback submitted successfully!</p>}
+    </div>
+  );
+};
+
+export default Feedback;
+
